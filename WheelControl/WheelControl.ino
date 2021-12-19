@@ -18,7 +18,6 @@ void loop() {
  
   rightTurn(90);
   while(1);
- 
   
 }
 
