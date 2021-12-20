@@ -1,6 +1,6 @@
 int ENA = 5, ENB = 6, IN1 = 7, IN2 = 8, IN3 = 9, IN4 = 11;
 float distance = 0;
-int degRotate = 0;
+float degRotate = 0;
 
 void setup() {
   pinMode(ENA, OUTPUT);
