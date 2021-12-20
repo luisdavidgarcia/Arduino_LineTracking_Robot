@@ -15,30 +15,45 @@ void setup() {
 }
 
 void loop() {
- 
-  rightTurn(90);
+
+  float velocity = 2;
+  float analogWheelValue = (velocity - 0.35)/.0075;
+
+  inputSpeed(analogWheelValue,analogWheelValue);
+  forward(5,velocity);
   while(1);
   
 }
 
-void forward(float distance){
+void inputSpeed(int tireSpeedLeft, int tireSpeedRight){
+  analogWrite(ENA,tireSpeedLeft);
+  analogWrite(ENB,tireSpeedRight);
+}
+
+void forward(float distance, float velocity){
   digitalWrite(IN1,HIGH);
   digitalWrite(IN2,LOW);
   digitalWrite(IN3,LOW);
   digitalWrite(IN4,HIGH);
+  
+  //To Calculate Velocity for Forward and backward by Using point slope form equation for points at 130 and 255
+  //float velocity = .0075*wheelValue + .35;
+  
   //calibration from distance to time in ms 
-  float t = (distance / 2.45) * 1000;
+  float t = (distance / velocity) * 1000;
   delay(t);
   stopCar();
 }  
 
-void backward(float distance){
+void backward(float distance, float wheelValue){
   digitalWrite(IN1,LOW);
   digitalWrite(IN2,HIGH);
   digitalWrite(IN3,HIGH);
   digitalWrite(IN4,LOW);
+  //Calculate Velocity for Forward and backward by Using point slope form equation for points at 130 and 255
+  float velocity = .0075*wheelValue + .35;
   //calibration from distance to time in ms
-  float t = (distance / 2.45) * 1000;
+  float t = (distance / velocity) * 1000;
   delay(t);
   stopCar();
 }
