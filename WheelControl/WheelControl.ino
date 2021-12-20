@@ -3,8 +3,10 @@
 int IRpin = 12;
 
 int ENA = 5, ENB = 6, IN1 = 7, IN2 = 8, IN3 = 9, IN4 = 11;
-float distance = 0;
 int degRotate = 0;
+
+float velocity = 1.2, distance = 1;
+
 
 IRrecv IR(IRpin);
 decode_results cmd;
@@ -27,21 +29,123 @@ void setup() {
 }
 
 void loop() {
-
+  
   while(IR.decode(&cmd) == 0){}
 
-  float velocity = 1.2;
+  double star = 0xFF42BD, poundKey = 0xFF52AD;
+
+  //enter velocity with start and for speed just make a formula using point slope form
+  if (cmd.value == star){
+    delay(500);
+    IR.resume();
+
+    //Have to read again
+    while(IR.decode(&cmd)== 0) {}
+    delay(100);
+    
+    switch(cmd.value){
+      case 0xFF6897: {
+        velocity = 1;
+        break;
+      }
+      case 0xFF9867: {
+        velocity = 1.14;
+        break;
+      }
+      case 0XFFB04f: {
+        velocity = 1.28;
+        break;
+      }
+      case 0xFF30CF: {
+        velocity = 1.42;
+        break;
+      }
+      case 0xFF18E7: {
+        velocity = 1.7;
+        break;
+      }
+      case 0xFF7A85: {
+        velocity = 1.84;
+        break;
+      }
+      case 0xFF10EF: {
+        velocity = 1.98;
+        break;
+      }
+      case 0xFF38C7: {
+        velocity = 2.12;
+        break;
+      }
+      case 0xFF5AA5: {
+        velocity = 2.26;
+        break;
+      }
+      case 0xFF42BD: {
+        velocity = 0.35;
+        break;
+      }
+    }
+  }
+
+ 
+
+  if (cmd.value == poundKey) {
+    delay(500);
+    IR.resume();
+    while(IR.decode(&cmd)== 0) {}
+    delay(100);
+
+    switch(cmd.value){
+      case 0xFF6897: {
+        distance = 1;
+        break;
+      }
+      case 0xFF9867: {
+        distance = 2;
+        break;
+      }
+      case 0XFFB04f: {
+        distance = 3;
+        break;
+      }
+      case 0xFF30CF: {
+        distance = 4;
+        break;
+      }
+      case 0xFF18E7: {
+        distance = 5;
+        break;
+      }
+      case 0xFF7A85: {
+        distance = 6;
+        break;
+      }
+      case 0xFF10EF: {
+        distance = 7;
+        break;
+      }
+      case 0xFF38C7: {
+        distance = 8;
+        break;
+      }
+      case 0xFF5AA5: {
+        distance = 9;
+        break;
+      }
+      case 0xFF42BD: {
+        distance = 0;
+        break;
+      }
+    }    
+  }
+
+
   float analogWheelValue = (velocity - 0.35)/.0075;
   inputSpeed(analogWheelValue,analogWheelValue);
-  //rightTurn(180,analogWheelValue);
-  //forward(5,velocity);
-
-  delay(500);
-  IR.resume();
-
+  
   switch (cmd.value){
     case 0xFF629D: {
-      forward(1,velocity);
+      forward(distance,velocity);
       break;
     }
     case 0xFFC23D: {
@@ -49,7 +153,7 @@ void loop() {
       break;
     }
     case 0xFFA857: {
-      backward(1,velocity);
+      backward(distance,velocity);
       break;
     }
     case 0xFF22DD: {
@@ -57,10 +161,19 @@ void loop() {
       break;
     }
     case 0xFF02FD: {
-       stopCar(); 
+      stopCar(); 
       break;
     }
   }
+
+  delay(500);
+  IR.resume();
+  
+
+
+  
+
+ 
   /*
   if (cmd.value == 0xFF629D){forward(1,velocity);}
   if (cmd.value == 0xFFC23D) {rightTurn(90, analogWheelValue);}
