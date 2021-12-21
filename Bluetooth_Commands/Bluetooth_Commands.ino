@@ -1,7 +1,7 @@
 
 int ENA = 5, ENB = 6, IN1 = 7, IN2 = 8, IN3 = 9, IN4 = 11;
-float velocity = 1.2, distance = 1;
-char cmd, buttonSpeed = "*", buttonDistance = "#";
+float velocity = 1.2, distance = 1, degree = 0;
+char cmd, buttonSpeed = 's', buttonDistance = 'd', addDegree = '+', subDegree = '-';
 
 
 void setup() {
@@ -20,20 +20,46 @@ void setup() {
 }
 
 void loop() {
+
+  //calculations for analogWheelValue
+  float analogWheelValue = (velocity - 0.35)/.0075;
+  inputSpeed(analogWheelValue,analogWheelValue);
   
   while(Serial.available() == 0){}
   cmd = Serial.read();
+  //Reading for Car Direciton 
+  switch(cmd){
+    case 'f': {
+      forward(distance,velocity);
+      break;
+    }
+    case 'b': {
+      backward(distance, velocity);
+      break;
+    }
+    case 'l': {
+      leftTurn(degree,analogWheelValue);
+      break;
+    }
+    case 'r': {
+      rightTurn(degree,analogWheelValue);
+      break;
+    }  
+  } 
+  //Reading for Degree Increment of Car
+  if (cmd == addDegree && degree != 180) {degree += 10;}
+  //Reading for Degree Decrement
+  else if (cmd == subDegree && (degree != 0 || degree <= 180)) {degree -= 10;}
+  else {degree = 90;}
 
-    
+  //Reading for Velocity of Car
   if (cmd == buttonSpeed){
+    delay(100);
     while(Serial.available() == 0){}
     cmd = Serial.read();
+    delay(100);
     //Reading for Setting Car Speed  
     switch(cmd){
-      case '0': {
-        velocity = 0.35;
-        break;
-      }
       case '1': {
         velocity = 1;
         break;
@@ -74,13 +100,11 @@ void loop() {
   }
   //Reading for Setting Car Distance
   if(cmd == buttonDistance){
+    delay(100);
     while(Serial.available() == 0){}
     cmd = Serial.read();
+    delay(100);
     switch(cmd){
-      case '0': {
-        distance = 0;
-        break;
-      }
       case '1': {
         distance = 1;
         break;
@@ -118,32 +142,6 @@ void loop() {
         break;
       }
     }
-  }
-  
-
-//calculations for analogWheelValue
-  float analogWheelValue = (velocity - 0.35)/.0075;
-  inputSpeed(analogWheelValue,analogWheelValue);
- 
- //Reading for Car Direciton 
-  switch(cmd){
-    case 'f': {
-      forward(distance,velocity);
-      break;
-    }
-    case 'b': {
-      backward(distance, velocity);
-      break;
-    }
-    case 'l': {
-      leftTurn(90,analogWheelValue);
-      break;
-    }
-    case 'r': {
-      rightTurn(90,analogWheelValue);
-      break;
-    }
-    
   } 
 }
 
