@@ -147,8 +147,8 @@ void loop() {
 }
 
 //Function Provides us with the time of Ping Travel
-float pingTime(){
-  float pingTravelTime = 0;
+unsigned int pingTime(){
+  unsigned int pingTravelTime = 0;
   digitalWrite(Trig,LOW);
   delayMicroseconds(2);
   digitalWrite(Trig,HIGH);
@@ -159,7 +159,7 @@ float pingTime(){
 }
 //Function provides us with distance between car and obstacle in inches
 float measureDistance(){
-  float pingTravelTime = pingTime();
+  unsigned int pingTravelTime = pingTime();
   float distance_sound = 0, distance_between_objects = 0;
   //speed of sound is 761 mi/hr
   distance_sound = ((761.0 * 63360.0 * pingTravelTime)/3600000000.0);
@@ -176,8 +176,11 @@ void inputSpeed(int tireSpeedLeft, int tireSpeedRight){
 }
 
 void forward(float distance, float velocity){
-  float objectDistance = 0;
-  int calculatedDistance = 0;
+  float obstacleDistance = 0, targetTime;
+  int currentDistance = 0, currentTime, stoppedTime = 0, startTime, initialTimeStop, finalTimeStop;
+  bool carBlocked = false;
+  
+  startTime = millis();
   digitalWrite(IN1,HIGH);
   digitalWrite(IN2,LOW);
   digitalWrite(IN3,LOW);
@@ -186,17 +189,34 @@ void forward(float distance, float velocity){
   //To Calculate Velocity for Forward and backward by Using point slope form equation for points at 130 and 255
   //float velocity = .0075*wheelValue + .35;
 
-  objectDistance = measureDistance();
-  
-  while (distance != calculatedDistance){
-    calculatedDistance += 1;
-    //calibration from distance to time in ms 
-    float t = (calculatedDistance / velocity) * 1000;
-    delay(t);
-    if(objectDistance <= 2) {stopCar();}
-    objectDistance = measureDistance(); 
+  targetTime = distance/velocity * 1000;
+  //Measure current time
+  currentTime = millis() - startTime - stoppedTime;
+
+  //loop to for obstacle detection
+  while (currentTime <= targetTime){
+    currentTime = millis() - startTime - stoppedTime;
+    obstacleDistance = measureDistance();
+    // loop to check if obstacle is in sight 
+    int initialTimeStop = millis();
+    while(obstacleDistance <= 12) {
+      stopCar();
+      //must remeasure or else will be in the loop constantly
+      obstacleDistance = measureDistance(); 
+      carBlocked = true; 
+    }
+    int finalTimeStop =  millis();
+    if (carBlocked == true) {
+      stoppedTime += (finalTimeStop - initialTimeStop);
+      //reset carBlocked so that it doesn't repeat loop
+      carBlocked = false;
+      //turn motors on again 
+      digitalWrite(IN1,HIGH);
+      digitalWrite(IN2,LOW);
+      digitalWrite(IN3,LOW);
+      digitalWrite(IN4,HIGH);
+    }
   }
-  
   stopCar();
 }  
 
