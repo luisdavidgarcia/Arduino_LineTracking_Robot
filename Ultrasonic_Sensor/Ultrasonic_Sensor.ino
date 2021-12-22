@@ -1,8 +1,5 @@
-int Trig = A5;
-int Echo = A4;
-int pingT = 0;
-
-float distance_between_objects = 0, distance_sound = 0, velocity_sound = 0;
+int Trig = A5, Echo = A4;
+float distance = 0;
 
 void setup() {
   pinMode(Trig,OUTPUT);
@@ -11,18 +8,13 @@ void setup() {
 }
 
 void loop() {
-  pingT = pingTime();
-  //Serial.println(pingT);
-  //delay(500);
-  velocity_sound = 331.4 + 0.6*20.56;
-  distance_sound = velocity_sound * pingT * .000001;
-  distance_between_objects = 0.5 * distance_sound * 0.0254;
-  Serial.println(distance_between_objects);
+  distance = measureDistance();
+  Serial.println(distance);
   delay(500);
 }
 
-int pingTime(){
-  int pingTravelTime = 0;
+float pingTime(){
+  float pingTravelTime = 0;
   digitalWrite(Trig,LOW);
   delayMicroseconds(2);
   digitalWrite(Trig,HIGH);
@@ -30,4 +22,14 @@ int pingTime(){
   digitalWrite(Trig,LOW);
   pingTravelTime = pulseIn(Echo,HIGH);
   return pingTravelTime;
+}
+
+float measureDistance(){
+  float pingTravelTime = pingTime();
+  float distance_sound = 0, distance_between_objects = 0;
+  //speed of sound is 761 mi/hr
+  distance_sound = ((761.0 * 63360.0 * pingTravelTime)/3600000000.0);
+  distance_between_objects = 0.5*distance_sound;
+  //distance is in inches
+  return distance_between_objects;
 }
