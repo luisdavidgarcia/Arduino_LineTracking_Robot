@@ -1,13 +1,14 @@
 
-int ENA = 5, ENB = 6, IN1 = 7, IN2 = 8, IN3 = 9, IN4 = 11;
-float velocity = 1.2, distance = 1, degree = 0;
+int ENA = 5, ENB = 6, IN1 = 7, IN2 = 8, IN3 = 9, IN4 = 11, Trig = A5, Echo = A4;
+float velocity = 1.2, distance = 1, degree = 0, objectDistance = 0;
 char cmd, buttonSpeed = 's', buttonDistance = 'd', addDegree = '+', subDegree = '-';
-
 
 void setup() {
   
   Serial.begin(9600);
-  
+
+  pinMode(Trig,OUTPUT);
+  pinMode(Echo,INPUT);
   pinMode(ENA, OUTPUT);
   pinMode(ENB, OUTPUT);
   pinMode(IN1, OUTPUT);
@@ -145,6 +146,29 @@ void loop() {
   } 
 }
 
+//Function Provides us with the time of Ping Travel
+float pingTime(){
+  float pingTravelTime = 0;
+  digitalWrite(Trig,LOW);
+  delayMicroseconds(2);
+  digitalWrite(Trig,HIGH);
+  delayMicroseconds(20);
+  digitalWrite(Trig,LOW);
+  pingTravelTime = pulseIn(Echo,HIGH);
+  return pingTravelTime;
+}
+//Function provides us with distance between car and obstacle in inches
+float measureDistance(){
+  float pingTravelTime = pingTime();
+  float distance_sound = 0, distance_between_objects = 0;
+  //speed of sound is 761 mi/hr
+  distance_sound = ((761.0 * 63360.0 * pingTravelTime)/3600000000.0);
+  distance_between_objects = 0.5*distance_sound;
+  //distance is in inches
+  return distance_between_objects;
+}
+
+
 //Function permits us to input only velocity in our funcitons since the speed will be set.
 void inputSpeed(int tireSpeedLeft, int tireSpeedRight){
   analogWrite(ENA,tireSpeedLeft);
@@ -152,6 +176,8 @@ void inputSpeed(int tireSpeedLeft, int tireSpeedRight){
 }
 
 void forward(float distance, float velocity){
+  float objectDistance = 0;
+  int calculatedDistance = 0;
   digitalWrite(IN1,HIGH);
   digitalWrite(IN2,LOW);
   digitalWrite(IN3,LOW);
@@ -159,10 +185,18 @@ void forward(float distance, float velocity){
   
   //To Calculate Velocity for Forward and backward by Using point slope form equation for points at 130 and 255
   //float velocity = .0075*wheelValue + .35;
+
+  objectDistance = measureDistance();
   
-  //calibration from distance to time in ms 
-  float t = (distance / velocity) * 1000;
-  delay(t);
+  while (distance != calculatedDistance){
+    calculatedDistance += 1;
+    //calibration from distance to time in ms 
+    float t = (calculatedDistance / velocity) * 1000;
+    delay(t);
+    if(objectDistance <= 2) {stopCar();}
+    objectDistance = measureDistance(); 
+  }
+  
   stopCar();
 }  
 
