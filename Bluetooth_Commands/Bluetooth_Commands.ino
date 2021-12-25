@@ -3,8 +3,8 @@
 //these are all constants
 //int ENA = 5, ENB = 6, IN1 = 7, IN2 = 8, IN3 = 9, IN4 = 11, Trig = A5, Echo = A4;
 //these are not constants;
-float velocity = 1.2, distance = 1, degree = 0, objectDistance = 0;
-char cmd, buttonSpeed = 's', buttonDistance = 'd', addDegree = '+', subDegree = '-';
+//float velocity = 1.2, distance = 1, degree = 0, objectDistance = 0;
+char cmd1, buttonSpeed = 's', buttonDistance = 'd', addDegree = '+', subDegree = '-';
 
 robotCar roboCar;
 
@@ -12,7 +12,6 @@ void setup() {
   
   Serial.begin(9600);
 
-  roboCar.setUp();
   //pinMode(Trig,OUTPUT);
   //pinMode(Echo,INPUT);
   //pinMode(ENA, OUTPUT);
@@ -32,29 +31,29 @@ void loop() {
   roboCar.inputSpeed();
 
   while(Serial.available() == 0){}
-  cmd = Serial.read();
+  cmd1 = Serial.read();
   //Reading for Degree Increment of Car
-  if (cmd == addDegree && degree != 180) {degree += 10;}
+  //if (cmd == addDegree && degree != 180) {degree += 10;}
   //Reading for Degree Decrement
-  else if (cmd == subDegree && (degree != 0 || degree <= 180)) {degree -= 10;}
-  else {degree = 90;}
+  //else if (cmd == subDegree && (degree != 0 || degree <= 180)) {degree -= 10;}
+  //else {degree = 90;}
 
   //Reading for Velocity of Car
-  if (cmd == buttonSpeed){
+  if (cmd1 == buttonSpeed){
     delay(100);
     while(Serial.available() == 0){}
-    cmd = Serial.read();
+    cmd1 = Serial.read();
     delay(100);
-    roboCar.bluetoothSpeedReading(cmd);
+    roboCar.bluetoothSpeedReading(cmd1);
   }
-  if(cmd == buttonDistance){
+  if(cmd1 == buttonDistance){
     delay(100);
     while(Serial.available() == 0){}
-    cmd = Serial.read();
+    cmd1 = Serial.read();
     delay(100);
-    roboCar.bluetoothDistanceReading(cmd);
+    roboCar.bluetoothDistanceReading(cmd1);
   }
-  bluetoothCarCommand(cmd);
+  roboCar.bluetoothCarCommand(cmd1);
 }
 /*
 void bluetoothCarCommand(){

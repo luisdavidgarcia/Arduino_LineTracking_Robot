@@ -1,15 +1,21 @@
 #include "robotCar.h"
 #include <Arduino.h>
 
+robotCar::robotCar() {
+	setUp();
+}	
+
 robotCar::robotCar(float velocity, float distance) {
 	this->velocity = velocity;
 	this->distance = distance;
+	setUp();
 }
 
 robotCar::robotCar(float velocity, float distance, float degree){
 	this->velocity = velocity;
 	this->distance = distance;
 	this->degree = degree;
+	setUp();
 }	
 
 robotCar::robotCar(float velocity, float distance, float degree, float objectDistance) {
@@ -17,6 +23,7 @@ robotCar::robotCar(float velocity, float distance, float degree, float objectDis
 	this->distance = distance;
 	this->degree = degree;
 	this->objectDistance = objectDistance;
+	setUp();
 }	
 
 void robotCar::setUp(){
