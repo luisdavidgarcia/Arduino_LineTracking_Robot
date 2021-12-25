@@ -1,33 +1,36 @@
 
+#include "robotCar.h"
 //these are all constants
-int ENA = 5, ENB = 6, IN1 = 7, IN2 = 8, IN3 = 9, IN4 = 11, Trig = A5, Echo = A4;
+//int ENA = 5, ENB = 6, IN1 = 7, IN2 = 8, IN3 = 9, IN4 = 11, Trig = A5, Echo = A4;
 //these are not constants;
 float velocity = 1.2, distance = 1, degree = 0, objectDistance = 0;
 char cmd, buttonSpeed = 's', buttonDistance = 'd', addDegree = '+', subDegree = '-';
+
+robotCar roboCar;
 
 void setup() {
   
   Serial.begin(9600);
 
-  pinMode(Trig,OUTPUT);
-  pinMode(Echo,INPUT);
-  pinMode(ENA, OUTPUT);
-  pinMode(ENB, OUTPUT);
-  pinMode(IN1, OUTPUT);
-  pinMode(IN2, OUTPUT);
-  pinMode(IN3, OUTPUT);
-  pinMode(IN4, OUTPUT);
-  
-  digitalWrite(ENA, HIGH);
-  digitalWrite(ENB, HIGH);
+  roboCar.setUp();
+  //pinMode(Trig,OUTPUT);
+  //pinMode(Echo,INPUT);
+  //pinMode(ENA, OUTPUT);
+  //pinMode(ENB, OUTPUT);
+  //pinMode(IN1, OUTPUT);
+  //pinMode(IN2, OUTPUT);
+  //pinMode(IN3, OUTPUT);
+  //pinMode(IN4, OUTPUT);
+  //digitalWrite(ENA, HIGH);
+  //digitalWrite(ENB, HIGH);
 }
 
 void loop() {
 
   //calculations for analogWheelValue
-  float analogWheelValue = (velocity - 0.35)/.0075;
-  inputSpeed(analogWheelValue,analogWheelValue);
-  
+  //float analogWheelValue = (velocity - 0.35)/.0075;
+  roboCar.inputSpeed();
+
   while(Serial.available() == 0){}
   cmd = Serial.read();
   //Reading for Degree Increment of Car
@@ -42,17 +45,18 @@ void loop() {
     while(Serial.available() == 0){}
     cmd = Serial.read();
     delay(100);
-    bluetoothSpeedReading();
+    roboCar.bluetoothSpeedReading(cmd);
   }
   if(cmd == buttonDistance){
     delay(100);
     while(Serial.available() == 0){}
     cmd = Serial.read();
     delay(100);
-    bluetoothDistanceReading();
-  } 
+    roboCar.bluetoothDistanceReading(cmd);
+  }
+  bluetoothCarCommand(cmd);
 }
-
+/*
 void bluetoothCarCommand(){
   switch(cmd){
     case 'f': {
@@ -314,3 +318,5 @@ void calL(int analogWheelValue){
   analogWrite(ENB,analogWheelValue); 
   stopCar();
 }
+
+*/

@@ -1,6 +1,11 @@
 #include "robotCar.h"
 #include <Arduino.h>
 
+robotCar::robotCar(float velocity, float distance) {
+	this->velocity = velocity;
+	this->distance = distance;
+}
+
 robotCar::robotCar(float velocity, float distance, float degree){
 	this->velocity = velocity;
 	this->distance = distance;
@@ -28,7 +33,7 @@ void robotCar::setUp(){
   digitalWrite(ENB, HIGH);
 }	
 
-float robotCar::analogWheelValue(float velocity){
+float robotCar::analogWheelValue(){
 	float analogWheelValue = (velocity - 0.35)/.0075;
 	return analogWheelValue;
 }	
@@ -54,34 +59,35 @@ float robotCar::measureDistance(){
   return distance_between_objects;
 }
 
-void robotCar::pathSquare(int sideLength, float velocity){
+void robotCar::pathSquare(int sideLength){
   float analogWheelValue = (velocity - 0.35)/.0075;
+  distance = sideLength;
   stopCar();
   delay(100);
-  forward(sideLength,velocity);
+  forward();
   delay(100);
-  rightTurn(90, analogWheelValue);
-  forward(sideLength,velocity);
+  rightTurn();
+  forward();
   delay(100);
-  rightTurn(90, analogWheelValue);
-  forward(sideLength,velocity);
+  rightTurn();
+  forward();
   delay(100);
-  leftTurn(90, analogWheelValue);
-  forward(sideLength,velocity);
+  leftTurn();
+  forward();
   delay(100);
-  rightTurn(90, analogWheelValue);
+  rightTurn();
   delay(100);
   stopCar();
 }
 
-void robotCar:stopCar(){
+void robotCar::stopCar(){
   digitalWrite(IN1,LOW);
   digitalWrite(IN2,LOW);
   digitalWrite(IN3,LOW);
   digitalWrite(IN4,LOW);	
 }
 
-void robotCar::backward(float distance, float velocity){
+void robotCar::backward(){
   digitalWrite(IN1,LOW);
   digitalWrite(IN2,HIGH);
   digitalWrite(IN3,HIGH);
@@ -92,7 +98,8 @@ void robotCar::backward(float distance, float velocity){
   stopCar();
 }
 
-void robotCar::rightTurn(int deg, float analogWheelValue){
+void robotCar::rightTurn(){
+  float analogWheelValue = (velocity - 0.35)/.0075;
   //stop car and delay it to ensure turn occurs smoothly 
   stopCar();
   delay(100);
@@ -104,12 +111,13 @@ void robotCar::rightTurn(int deg, float analogWheelValue){
   digitalWrite(IN3,HIGH);
   digitalWrite(IN4,LOW);
   //Calibrate from degrees to time in ms (Theta = omega * t)
-  float t = ((deg + 36)/119.143) * 1000;
+  float t = ((degree + 36)/119.143) * 1000;
   delay(t);
   stopCar();
 }
 
-void robotCar::leftTurn(int deg, float analogWheelValue){
+void robotCar::leftTurn(){
+  float analogWheelValue = (velocity - 0.35)/.0075;
   //stop car and delay it to ensure turn occurs smoothly 
   stopCar();
   delay(100);
@@ -121,12 +129,12 @@ void robotCar::leftTurn(int deg, float analogWheelValue){
   digitalWrite(IN3,LOW);
   digitalWrite(IN4,HIGH);
   //Calibrate from degrees to time in ms (Theta = omega * t) using Linear Regression
-  float t = ((deg + 36)/119.143) * 1000;
+  float t = ((degree + 36)/119.143) * 1000;
   delay(t);
   stopCar();
 } 
 
-void robotCar::forward(float distance, float velocity){
+void robotCar::forward(){
 float obstacleDistance = 0, targetTime;
   int currentDistance = 0, currentTime, stoppedTime = 0, startTime, initialTimeStop, finalTimeStop;
   bool carBlocked = false;
@@ -171,27 +179,28 @@ float obstacleDistance = 0, targetTime;
   stopCar();     
 }
 
-void robotCar::inputSpeed(int tireSpeedLeft, int tireSpeedRight){
-  analogWrite(ENA,tireSpeedLeft);
-  analogWrite(ENB,tireSpeedRight);	
+void robotCar::inputSpeed(){
+  float analogWheelValue = (velocity - 0.35)/.0075;
+  analogWrite(ENA,analogWheelValue);
+  analogWrite(ENB,analogWheelValue);	
 }
 
 void robotCar::bluetoothCarCommand(char cmd){
  switch(cmd){
     case 'f': {
-      forward(distance,velocity);
+      forward();
       break;
     }
     case 'b': {
-      backward(distance, velocity);
+      backward();
       break;
     }
     case 'l': {
-      leftTurn(degree,analogWheelValue);
+      leftTurn();
       break;
     }
     case 'r': {
-      rightTurn(degree,analogWheelValue);
+      rightTurn();
       break;
     }
   }
@@ -276,4 +285,5 @@ switch(cmd){
         velocity = 2.26;
         break;
       } 
+  }
 }	
