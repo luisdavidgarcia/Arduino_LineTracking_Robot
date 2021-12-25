@@ -1,5 +1,7 @@
 
+//these are all constants
 int ENA = 5, ENB = 6, IN1 = 7, IN2 = 8, IN3 = 9, IN4 = 11, Trig = A5, Echo = A4;
+//these are not constants;
 float velocity = 1.2, distance = 1, degree = 0, objectDistance = 0;
 char cmd, buttonSpeed = 's', buttonDistance = 'd', addDegree = '+', subDegree = '-';
 
@@ -28,7 +30,30 @@ void loop() {
   
   while(Serial.available() == 0){}
   cmd = Serial.read();
-  //Reading for Car Direciton 
+  //Reading for Degree Increment of Car
+  if (cmd == addDegree && degree != 180) {degree += 10;}
+  //Reading for Degree Decrement
+  else if (cmd == subDegree && (degree != 0 || degree <= 180)) {degree -= 10;}
+  else {degree = 90;}
+
+  //Reading for Velocity of Car
+  if (cmd == buttonSpeed){
+    delay(100);
+    while(Serial.available() == 0){}
+    cmd = Serial.read();
+    delay(100);
+    bluetoothSpeedReading();
+  }
+  if(cmd == buttonDistance){
+    delay(100);
+    while(Serial.available() == 0){}
+    cmd = Serial.read();
+    delay(100);
+    bluetoothDistanceReading();
+  } 
+}
+
+void bluetoothCarCommand(){
   switch(cmd){
     case 'f': {
       forward(distance,velocity);
@@ -47,19 +72,9 @@ void loop() {
       break;
     }  
   } 
-  //Reading for Degree Increment of Car
-  if (cmd == addDegree && degree != 180) {degree += 10;}
-  //Reading for Degree Decrement
-  else if (cmd == subDegree && (degree != 0 || degree <= 180)) {degree -= 10;}
-  else {degree = 90;}
+}
 
-  //Reading for Velocity of Car
-  if (cmd == buttonSpeed){
-    delay(100);
-    while(Serial.available() == 0){}
-    cmd = Serial.read();
-    delay(100);
-    //Reading for Setting Car Speed  
+void bluetoothSpeedReading(){
     switch(cmd){
       case '1': {
         velocity = 1;
@@ -98,13 +113,9 @@ void loop() {
         break;
       }         
     }
-  }
-  //Reading for Setting Car Distance
-  if(cmd == buttonDistance){
-    delay(100);
-    while(Serial.available() == 0){}
-    cmd = Serial.read();
-    delay(100);
+}
+
+void bluetoothDistanceReading(){
     switch(cmd){
       case '1': {
         distance = 1;
@@ -143,10 +154,8 @@ void loop() {
         break;
       }
     }
-  } 
 }
 
-//Function Provides us with the time of Ping Travel
 unsigned int pingTime(){
   unsigned int pingTravelTime = 0;
   digitalWrite(Trig,LOW);
@@ -157,7 +166,7 @@ unsigned int pingTime(){
   pingTravelTime = pulseIn(Echo,HIGH);
   return pingTravelTime;
 }
-//Function provides us with distance between car and obstacle in inches
+
 float measureDistance(){
   unsigned int pingTravelTime = pingTime();
   float distance_sound = 0, distance_between_objects = 0;
@@ -169,7 +178,6 @@ float measureDistance(){
 }
 
 
-//Function permits us to input only velocity in our funcitons since the speed will be set.
 void inputSpeed(int tireSpeedLeft, int tireSpeedRight){
   analogWrite(ENA,tireSpeedLeft);
   analogWrite(ENB,tireSpeedRight);
@@ -272,7 +280,6 @@ void stopCar(){
   digitalWrite(IN4,LOW);
 }  
 
-//Functions Based off the Main DC Motor Control Funcitons
 void pathSquare(int sideLength, float velocity){
   float analogWheelValue = (velocity - 0.35)/.0075;
   stopCar();
@@ -293,7 +300,6 @@ void pathSquare(int sideLength, float velocity){
   stopCar();
 }
 
-//Calibration Functions
 void calL(int analogWheelValue){
   stopCar();
   delay(100);
