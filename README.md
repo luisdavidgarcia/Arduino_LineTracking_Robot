@@ -1,4 +1,7 @@
 # 🚗 Arduino_LineTracking_Robot 🤖
+![arduinoCar](https://user-images.githubusercontent.com/87344382/176059601-9438a1e5-1b94-40d1-ba65-29d13a51f469.png)
+
+
 
 I assembled my first robot and learned how to program it to move, process data, detect objects, and follow functions I built using both IR sensors and bluetooth.
 
