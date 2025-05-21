@@ -1,9 +1,9 @@
-#ifndef ROBOTCAR_H
-#define ROBOTCAR_H
+#ifndef ROBOTCAR_HPP
+#define ROBOTCAR_HPP
 
 #include <Arduino.h>
 
-class robotCar {
+class RobotCar {
 	private:
 		const int ENA = 5;
 		const int ENB = 6;
@@ -13,16 +13,14 @@ class robotCar {
 		const int IN4 = 11;
 		const int Trig = A5;
 		const int Echo = A4;
+		const float SpeedOFSound = 761.0;
 		float distance = 1;
 		float velocity = 1.2;
 		float degree = 90;
 		float objectDistance = 0;
 
 	public:
-		robotCar();
-		robotCar(float velocity, float distance);
-		robotCar(float velocity, float distance, float degree);
-		robotCar(float velocity, float distance, float degree, float objectDistance);
+		RobotCar();
 		void setUp();
 		void bluetoothSpeedReading(char cmd);
 		void bluetoothDistanceReading(char cmd);
@@ -39,4 +37,4 @@ class robotCar {
 		float measureDistance();
 };		
 
-#endif
+#endif // ROBOTCAR_HPP

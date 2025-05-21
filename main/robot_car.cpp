@@ -1,24 +1,25 @@
-#include "robotCar.h"
+#include "robot_car.hpp"
 #include <Arduino.h>
 
-robotCar::robotCar() {
+RobotCar::RobotCar() 
+{
 	setUp();
 }	
 
-robotCar::robotCar(float velocity, float distance) {
-	this->velocity = velocity;
-	this->distance = distance;
+RobotCar::RobotCar(float velocity, float distance) 
+  : velocity(velocity), distance(distance) 
+{
 	setUp();
 }
 
-robotCar::robotCar(float velocity, float distance, float degree){
+RobotCar::RobotCar(float velocity, float distance, float degree){
 	this->velocity = velocity;
 	this->distance = distance;
 	this->degree = degree;
 	setUp();
 }	
 
-robotCar::robotCar(float velocity, float distance, float degree, float objectDistance) {
+RobotCar::RobotCar(float velocity, float distance, float degree, float objectDistance) {
 	this->velocity = velocity;
 	this->distance = distance;
 	this->degree = degree;
@@ -26,7 +27,7 @@ robotCar::robotCar(float velocity, float distance, float degree, float objectDis
 	setUp();
 }	
 
-void robotCar::setUp(){
+void RobotCar::setUp(){
   pinMode(Trig, OUTPUT);
   pinMode(Echo,INPUT);
   pinMode(ENA, OUTPUT);
@@ -40,12 +41,12 @@ void robotCar::setUp(){
   digitalWrite(ENB, HIGH);
 }	
 
-float robotCar::analogWheelValue(){
+float RobotCar::analogWheelValue(){
 	float analogWheelValue = (velocity - 0.35)/.0075;
 	return analogWheelValue;
 }	
 
-unsigned int robotCar::pingTime(){
+unsigned int RobotCar::pingTime(){
   unsigned int pingTravelTime = 0;
   digitalWrite(Trig,LOW);
   delayMicroseconds(2);
@@ -56,17 +57,16 @@ unsigned int robotCar::pingTime(){
   return pingTravelTime;
 }
 
-float robotCar::measureDistance(){
+float RobotCar::measureDistance(){
   unsigned int pingTravelTime = pingTime();
   float distance_sound = 0, distance_between_objects = 0;
-  //speed of sound is 761 mi/hr
-  distance_sound = ((761.0 * 63360.0 * pingTravelTime)/3600000000.0);
+  distance_sound = ((SpeedOFSound * 63360.0 * pingTravelTime)/3600000000.0);
   distance_between_objects = 0.5*distance_sound;
   //distance is in inches
   return distance_between_objects;
 }
 
-void robotCar::pathSquare(int sideLength){
+void RobotCar::pathSquare(int sideLength){
   float analogWheelValue = (velocity - 0.35)/.0075;
   distance = sideLength;
   stopCar();
@@ -87,14 +87,14 @@ void robotCar::pathSquare(int sideLength){
   stopCar();
 }
 
-void robotCar::stopCar(){
+void RobotCar::stopCar(){
   digitalWrite(IN1,LOW);
   digitalWrite(IN2,LOW);
   digitalWrite(IN3,LOW);
   digitalWrite(IN4,LOW);	
 }
 
-void robotCar::backward(){
+void RobotCar::backward(){
   digitalWrite(IN1,LOW);
   digitalWrite(IN2,HIGH);
   digitalWrite(IN3,HIGH);
@@ -105,7 +105,7 @@ void robotCar::backward(){
   stopCar();
 }
 
-void robotCar::rightTurn(){
+void RobotCar::rightTurn(){
   float analogWheelValue = (velocity - 0.35)/.0075;
   //stop car and delay it to ensure turn occurs smoothly 
   stopCar();
@@ -123,7 +123,7 @@ void robotCar::rightTurn(){
   stopCar();
 }
 
-void robotCar::leftTurn(){
+void RobotCar::leftTurn(){
   float analogWheelValue = (velocity - 0.35)/.0075;
   //stop car and delay it to ensure turn occurs smoothly 
   stopCar();
@@ -141,7 +141,7 @@ void robotCar::leftTurn(){
   stopCar();
 } 
 
-void robotCar::forward(){
+void RobotCar::forward(){
 float obstacleDistance = 0, targetTime;
   int currentDistance = 0, currentTime, stoppedTime = 0, startTime, initialTimeStop, finalTimeStop;
   bool carBlocked = false;
@@ -186,13 +186,13 @@ float obstacleDistance = 0, targetTime;
   stopCar();     
 }
 
-void robotCar::inputSpeed(){
+void RobotCar::inputSpeed(){
   float analogWheelValue = (velocity - 0.35)/.0075;
   analogWrite(ENA,analogWheelValue);
   analogWrite(ENB,analogWheelValue);	
 }
 
-void robotCar::bluetoothCarCommand(char cmd){
+void RobotCar::bluetoothCarCommand(char cmd){
  switch(cmd){
     case 'f': {
       forward();
@@ -213,7 +213,7 @@ void robotCar::bluetoothCarCommand(char cmd){
   }
 }	
 
-void robotCar::bluetoothDistanceReading(char cmd){
+void RobotCar::bluetoothDistanceReading(char cmd){
 switch(cmd){
       case '1': {
         distance = 1;
@@ -254,7 +254,7 @@ switch(cmd){
     }
 }
 
-void robotCar::bluetoothSpeedReading(char cmd) {
+void RobotCar::bluetoothSpeedReading(char cmd) {
 switch(cmd){
       case '1': {
         velocity = 1;
