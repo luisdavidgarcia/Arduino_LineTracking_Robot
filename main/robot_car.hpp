@@ -28,28 +28,28 @@ constexpr unsigned int TURN_PWM_SPEED = 130;
 
 class RobotCar {
 private:
-	float distance = 1;
-	float velocity = 1.2;
-	float degree = 90;
-	float objectDistance = 0;
+  float distance = 1;
+  float velocity = 1.2;
+  float degree = 90;
+  float objectDistance = 0;
 
-	void setUp() const;
-	float calculateAnalogWheelValue() const;
-	unsigned int pingTime() const;
-	void forward() const;
-	void backward() const;
-	void rightTurn() const;
-	void leftTurn() const;	
-	void stopCar() const;
-	float measureDistance() const;
-	
+  void setUp() const;
+  float calculateAnalogWheelValue() const;
+  unsigned int pingTime() const;
+  void forward() const;
+  void backward() const;
+  void rightTurn() const;
+  void leftTurn() const;
+  void stopCar() const;
+  float measureDistance() const;
+
 public:
-	RobotCar() {setUp();}
-	void bluetoothSpeedReading(char cmd);
-	void bluetoothDistanceReading(char cmd);
-	void bluetoothCarCommand(char cmd);
-	void inputSpeed();
-	void pathSquare(int sideLengthInches);
-};		
+  RobotCar() { setUp(); }
+  void bluetoothSpeedReading(char cmd);
+  void bluetoothDistanceReading(char cmd);
+  void bluetoothCarCommand(char cmd);
+  void inputSpeed();
+  void pathSquare(int sideLengthInches);
+};
 
 #endif // ROBOTCAR_HPP
