@@ -22,7 +22,7 @@ float RobotCar::calculateAnalogWheelValue() const
 	return (velocity - VelocityOffset)/VelocityScale;
 }	
 
-unsigned int RobotCar::pingTime()
+unsigned int RobotCar::pingTime() const
 {
   unsigned int pingTravelTime = 0;
   digitalWrite(Trig,LOW);
@@ -68,10 +68,10 @@ void RobotCar::pathSquare(int sideLength)
 
 void RobotCar::stopCar()
 {
-  digitalWrite(IN1,LOW);
-  digitalWrite(IN2,LOW);
-  digitalWrite(IN3,LOW);
-  digitalWrite(IN4,LOW);	
+  digitalWrite(IN1, LOW);
+  digitalWrite(IN2, LOW);
+  digitalWrite(IN3, LOW);
+  digitalWrite(IN4, LOW);	
 }
 
 void RobotCar::backward()

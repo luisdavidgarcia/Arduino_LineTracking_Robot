@@ -3,39 +3,41 @@
 
 #include <Arduino.h>
 
+constexpr int ENA = 5;
+constexpr int ENB = 6;
+constexpr int IN1 = 7;
+constexpr int IN2 = 8;
+constexpr int IN3 = 9;
+constexpr int IN4 = 11;
+constexpr int Trig = A5;
+constexpr int Echo = A4;
+constexpr float SpeedOFSound = 761.0F;
+constexpr float VelocityOffset = 0.45F;
+constexpr float VelocityScale = 0.0075F;
+
 class RobotCar {
 private:
-	const int ENA = 5;
-	const int ENB = 6;
-	const int IN1 = 7;
-	const int IN2 = 8;
-	const int IN3 = 9;
-	const int IN4 = 11;
-	const int Trig = A5;
-	const int Echo = A4;
-	const float SpeedOFSound = 761.0F;
-	const float VelocityOffset = 0.45F;
-	const float VelocityScale = 0.0075F;
 	float distance = 1;
 	float velocity = 1.2;
 	float degree = 90;
 	float objectDistance = 0;
+
 	void setUp() const;
 	float calculateAnalogWheelValue() const;
-
+	unsigned int pingTime() const;
+	void forward() const;
+	void backward() const;
+	void rightTurn() const;
+	void leftTurn() const;	
+	void stopCar() const;
+	
 public:
 	RobotCar() {setUp();}
 	void bluetoothSpeedReading(char cmd);
 	void bluetoothDistanceReading(char cmd);
 	void bluetoothCarCommand(char cmd);
 	void inputSpeed();
-	void forward();
-	void backward();
-	void rightTurn();
-	void leftTurn();	
-	void stopCar();
 	void pathSquare(int sideLength);
-	unsigned int pingTime();
 	float measureDistance();
 };		
 
