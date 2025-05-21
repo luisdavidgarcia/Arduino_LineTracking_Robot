@@ -24,14 +24,15 @@ float RobotCar::calculateAnalogWheelValue() const
 
 unsigned int RobotCar::pingTime() const
 {
-  unsigned int pingTravelTime = 0;
   digitalWrite(Trig, LOW);
   delayMicroseconds(TRIGGER_LOW_DELAY_US);
+
   digitalWrite(Trig, HIGH);
   delayMicroseconds(TRIGGER_HIGH_DELAY_US);
+
   digitalWrite(Trig, LOW);
-  pingTravelTime = pulseIn(Echo, HIGH);
-  return pingTravelTime;
+
+  return pulseIn(Echo, HIGH);
 }
 
 float RobotCar::measureDistance() const
@@ -46,8 +47,8 @@ float RobotCar::measureDistance() const
 
 void RobotCar::pathSquare(int sideLengthInches)
 {
-  float analogWheelValue = calculateAnalogWheelValue();
   distance = sideLengthInches;
+
   stopCar();
   delay(ACTION_DELAY_MS);
   forward();
@@ -81,8 +82,8 @@ void RobotCar::backward() const
   digitalWrite(IN3,HIGH);
   digitalWrite(IN4,LOW);
   //calibration from distance to time in ms
-  float t = (distance / velocity) * SecondsToMilliseconds;
-  delay(t);
+  unsigned int t_Milliseconds = (distance / velocity) * SecondsToMilliseconds;
+  delay(t_Milliseconds);
   stopCar();
 }
 
@@ -100,10 +101,10 @@ void RobotCar::rightTurn() const
   digitalWrite(IN3, HIGH);
   digitalWrite(IN4, LOW);
 
-  float t_MilliSeconds = (
+  unsigned int t_Milliseconds = (
       (degree + AngularOffsetDegrees)/AngularSpeedDegreesPerSec
     ) * SecondsToMilliseconds;
-  delay(t_MilliSeconds);
+  delay(t_Milliseconds);
   stopCar();
 }
 
@@ -120,7 +121,7 @@ void RobotCar::leftTurn()
   digitalWrite(IN2, HIGH);
   digitalWrite(IN3, LOW);
   digitalWrite(IN4, HIGH);
-  float t_MilliSeconds = (
+  unsigned int t_MilliSeconds = (
       (degree + AngularOffsetDegrees)/AngularSpeedDegreesPerSec
     ) * SecondsToMilliseconds;
   delay(t_MilliSeconds);
