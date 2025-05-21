@@ -1,35 +1,11 @@
 #include "robot_car.hpp"
 #include <Arduino.h>
 
-RobotCar::RobotCar() 
+void RobotCar::setUp() const
 {
-	setUp();
-}	
+  pinMode(Echo, INPUT);
 
-RobotCar::RobotCar(float velocity, float distance) 
-  : velocity(velocity), distance(distance) 
-{
-	setUp();
-}
-
-RobotCar::RobotCar(float velocity, float distance, float degree){
-	this->velocity = velocity;
-	this->distance = distance;
-	this->degree = degree;
-	setUp();
-}	
-
-RobotCar::RobotCar(float velocity, float distance, float degree, float objectDistance) {
-	this->velocity = velocity;
-	this->distance = distance;
-	this->degree = degree;
-	this->objectDistance = objectDistance;
-	setUp();
-}	
-
-void RobotCar::setUp(){
   pinMode(Trig, OUTPUT);
-  pinMode(Echo,INPUT);
   pinMode(ENA, OUTPUT);
   pinMode(ENB, OUTPUT);
   pinMode(IN1, OUTPUT);
@@ -41,12 +17,13 @@ void RobotCar::setUp(){
   digitalWrite(ENB, HIGH);
 }	
 
-float RobotCar::analogWheelValue(){
-	float analogWheelValue = (velocity - 0.35)/.0075;
-	return analogWheelValue;
+float RobotCar::calculateAnalogWheelValue() const
+{
+	return (velocity - VelocityOffset)/VelocityScale;
 }	
 
-unsigned int RobotCar::pingTime(){
+unsigned int RobotCar::pingTime()
+{
   unsigned int pingTravelTime = 0;
   digitalWrite(Trig,LOW);
   delayMicroseconds(2);
@@ -57,7 +34,8 @@ unsigned int RobotCar::pingTime(){
   return pingTravelTime;
 }
 
-float RobotCar::measureDistance(){
+float RobotCar::measureDistance()
+{
   unsigned int pingTravelTime = pingTime();
   float distance_sound = 0, distance_between_objects = 0;
   distance_sound = ((SpeedOFSound * 63360.0 * pingTravelTime)/3600000000.0);
@@ -66,8 +44,9 @@ float RobotCar::measureDistance(){
   return distance_between_objects;
 }
 
-void RobotCar::pathSquare(int sideLength){
-  float analogWheelValue = (velocity - 0.35)/.0075;
+void RobotCar::pathSquare(int sideLength)
+{
+  float analogWheelValue = calculateAnalogWheelValue();
   distance = sideLength;
   stopCar();
   delay(100);
@@ -87,14 +66,16 @@ void RobotCar::pathSquare(int sideLength){
   stopCar();
 }
 
-void RobotCar::stopCar(){
+void RobotCar::stopCar()
+{
   digitalWrite(IN1,LOW);
   digitalWrite(IN2,LOW);
   digitalWrite(IN3,LOW);
   digitalWrite(IN4,LOW);	
 }
 
-void RobotCar::backward(){
+void RobotCar::backward()
+{
   digitalWrite(IN1,LOW);
   digitalWrite(IN2,HIGH);
   digitalWrite(IN3,HIGH);
@@ -105,8 +86,9 @@ void RobotCar::backward(){
   stopCar();
 }
 
-void RobotCar::rightTurn(){
-  float analogWheelValue = (velocity - 0.35)/.0075;
+void RobotCar::rightTurn()
+{
+  float analogWheelValue = calculateAnalogWheelValue();
   //stop car and delay it to ensure turn occurs smoothly 
   stopCar();
   delay(100);
@@ -123,8 +105,9 @@ void RobotCar::rightTurn(){
   stopCar();
 }
 
-void RobotCar::leftTurn(){
-  float analogWheelValue = (velocity - 0.35)/.0075;
+void RobotCar::leftTurn()
+{
+  float analogWheelValue = calculateAnalogWheelValue();
   //stop car and delay it to ensure turn occurs smoothly 
   stopCar();
   delay(100);
@@ -141,8 +124,9 @@ void RobotCar::leftTurn(){
   stopCar();
 } 
 
-void RobotCar::forward(){
-float obstacleDistance = 0, targetTime;
+void RobotCar::forward()
+{
+  float obstacleDistance = 0, targetTime;
   int currentDistance = 0, currentTime, stoppedTime = 0, startTime, initialTimeStop, finalTimeStop;
   bool carBlocked = false;
 
@@ -151,9 +135,6 @@ float obstacleDistance = 0, targetTime;
   digitalWrite(IN2,LOW);
   digitalWrite(IN3,LOW);
   digitalWrite(IN4,HIGH);
-
-  //To Calculate Velocity for Forward and backward by Using point slope form equation for points at 130 and 255
-  //float velocity = .0075*wheelValue + .35;
 
   targetTime = distance/velocity * 1000;
   //Measure current time
@@ -186,13 +167,15 @@ float obstacleDistance = 0, targetTime;
   stopCar();     
 }
 
-void RobotCar::inputSpeed(){
-  float analogWheelValue = (velocity - 0.35)/.0075;
-  analogWrite(ENA,analogWheelValue);
-  analogWrite(ENB,analogWheelValue);	
+void RobotCar::inputSpeed()
+{
+  float analogWheelValue = calculateAnalogWheelValue();
+  analogWrite(ENA, analogWheelValue);
+  analogWrite(ENB, analogWheelValue);	
 }
 
-void RobotCar::bluetoothCarCommand(char cmd){
+void RobotCar::bluetoothCarCommand(char cmd)
+{
  switch(cmd){
     case 'f': {
       forward();
@@ -213,84 +196,94 @@ void RobotCar::bluetoothCarCommand(char cmd){
   }
 }	
 
-void RobotCar::bluetoothDistanceReading(char cmd){
-switch(cmd){
-      case '1': {
-        distance = 1;
-        break;
-      }
-      case '2': {
-        distance = 2;
-        break;       
-      }       
-      case '3': {
-        distance = 3;
-        break;       
-      }       
-      case '4': {
-        distance = 4;
-        break;       
-      }       
-      case '5': {
-        distance = 5;
-        break;       
-      }       
-      case '6': {
-        distance = 6;
-        break;       
-      }       
-      case '7': {
-        distance = 7;
-        break;       
-      }       
-      case '8': {
-        distance = 8;
-        break;       
-      }       
-      case '9': {
-        distance = 9;
-        break;       
-      }
+void RobotCar::bluetoothDistanceReading(char cmd)
+{
+  switch(cmd){
+    case '1': {
+      distance = 1;
+      break;
     }
+    case '2': {
+      distance = 2;
+      break;       
+    }       
+    case '3': {
+      distance = 3;
+      break;       
+    }       
+    case '4': {
+      distance = 4;
+      break;       
+    }       
+    case '5': {
+      distance = 5;
+      break;       
+    }       
+    case '6': {
+      distance = 6;
+      break;       
+    }       
+    case '7': {
+      distance = 7;
+      break;       
+    }       
+    case '8': {
+      distance = 8;
+      break;       
+    }       
+    case '9': {
+      distance = 9;
+      break;       
+    }
+    default: {
+      distance = 1;
+      break;
+    }
+  }
 }
 
-void RobotCar::bluetoothSpeedReading(char cmd) {
-switch(cmd){
-      case '1': {
-        velocity = 1;
-        break;
-      }
-      case '2': {
-        velocity = 1.14;
-        break;
-      }
-      case '3': {
-        velocity = 1.28;
-        break;
-      }
-      case '4': {
-        velocity = 1.42;
-        break;
-      }
-      case '5': {
-        velocity = 1.7;
-        break;
-      }
-      case '6': {
-        velocity = 1.84;
-        break;
-      }
-      case '7': {
-        velocity = 1.98;
-        break;                                                                                                                                                        
-      }                                                                                                                                                               
-      case '8': {                                                                                                                                                     
-        velocity = 2.12;                                                                                                                                              
-        break;                                                                                                                                                        
-      }
-      case '9': {
-        velocity = 2.26;
-        break;
-      } 
+void RobotCar::bluetoothSpeedReading(char cmd) 
+{
+  switch(cmd){
+    case '1': {
+      velocity = 1;
+      break;
+    }
+    case '2': {
+      velocity = 1.14;
+      break;
+    }
+    case '3': {
+      velocity = 1.28;
+      break;
+    }
+    case '4': {
+      velocity = 1.42;
+      break;
+    }
+    case '5': {
+      velocity = 1.7;
+      break;
+    }
+    case '6': {
+      velocity = 1.84;
+      break;
+    }
+    case '7': {
+      velocity = 1.98;
+      break;                                                                                                                                                        
+    }                                                                                                                                                               
+    case '8': {                                                                                                                                                     
+      velocity = 2.12;                                                                                                                                              
+      break;                                                                                                                                                        
+    }
+    case '9': {
+      velocity = 2.26;
+      break;
+    } 
+    default: {
+      velocity = 1;
+      break;
+    }
   }
 }	
