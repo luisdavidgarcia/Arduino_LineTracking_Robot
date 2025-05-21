@@ -25,48 +25,48 @@ float RobotCar::calculateAnalogWheelValue() const
 unsigned int RobotCar::pingTime() const
 {
   unsigned int pingTravelTime = 0;
-  digitalWrite(Trig,LOW);
-  delayMicroseconds(2);
-  digitalWrite(Trig,HIGH);
-  delayMicroseconds(20);
-  digitalWrite(Trig,LOW);
-  pingTravelTime = pulseIn(Echo,HIGH);
+  digitalWrite(Trig, LOW);
+  delayMicroseconds(TRIGGER_LOW_DELAY_US);
+  digitalWrite(Trig, HIGH);
+  delayMicroseconds(TRIGGER_HIGH_DELAY_US);
+  digitalWrite(Trig, LOW);
+  pingTravelTime = pulseIn(Echo, HIGH);
   return pingTravelTime;
 }
 
-float RobotCar::measureDistance()
+float RobotCar::measureDistance() const
 {
   unsigned int pingTravelTime = pingTime();
-  float distance_sound = 0, distance_between_objects = 0;
-  distance_sound = ((SpeedOFSound * 63360.0 * pingTravelTime)/3600000000.0);
-  distance_between_objects = 0.5*distance_sound;
-  //distance is in inches
-  return distance_between_objects;
+  float soundRoundTripDistanceINCH = (
+    (SpeedOFSound_MILES_PER_HOUR * INCHES_PER_MILE * pingTravelTime)/
+    MICROSECONDS_PER_HOUR
+  );
+  return ScaleByHalf * soundRoundTripDistanceINCH;
 }
 
-void RobotCar::pathSquare(int sideLength)
+void RobotCar::pathSquare(int sideLengthInches)
 {
   float analogWheelValue = calculateAnalogWheelValue();
-  distance = sideLength;
+  distance = sideLengthInches;
   stopCar();
-  delay(100);
+  delay(ACTION_DELAY_MS);
   forward();
-  delay(100);
+  delay(ACTION_DELAY_MS);
   rightTurn();
   forward();
-  delay(100);
+  delay(ACTION_DELAY_MS);
   rightTurn();
   forward();
-  delay(100);
+  delay(ACTION_DELAY_MS);
   leftTurn();
   forward();
-  delay(100);
+  delay(ACTION_DELAY_MS);
   rightTurn();
-  delay(100);
+  delay(ACTION_DELAY_MS);
   stopCar();
 }
 
-void RobotCar::stopCar()
+void RobotCar::stopCar() const
 {
   digitalWrite(IN1, LOW);
   digitalWrite(IN2, LOW);
@@ -74,109 +74,113 @@ void RobotCar::stopCar()
   digitalWrite(IN4, LOW);	
 }
 
-void RobotCar::backward()
+void RobotCar::backward() const
 {
   digitalWrite(IN1,LOW);
   digitalWrite(IN2,HIGH);
   digitalWrite(IN3,HIGH);
   digitalWrite(IN4,LOW);
   //calibration from distance to time in ms
-  float t = (distance / velocity) * 1000;
+  float t = (distance / velocity) * SecondsToMilliseconds;
   delay(t);
   stopCar();
 }
 
-void RobotCar::rightTurn()
+void RobotCar::rightTurn() const
 {
-  float analogWheelValue = calculateAnalogWheelValue();
   //stop car and delay it to ensure turn occurs smoothly 
   stopCar();
-  delay(100);
+  delay(ACTION_DELAY_MS);
+
   //analog value should be smaller for smoother turn
-  analogWrite(ENA,130);
-  analogWrite(ENB,130);
-  digitalWrite(IN1,HIGH);
-  digitalWrite(IN2,LOW);
-  digitalWrite(IN3,HIGH);
-  digitalWrite(IN4,LOW);
-  //Calibrate from degrees to time in ms (Theta = omega * t)
-  float t = ((degree + 36)/119.143) * 1000;
-  delay(t);
+  analogWrite(ENA, TURN_PWM_SPEED);
+  analogWrite(ENB, TURN_PWM_SPEED);
+  digitalWrite(IN1, HIGH);
+  digitalWrite(IN2, LOW);
+  digitalWrite(IN3, HIGH);
+  digitalWrite(IN4, LOW);
+
+  float t_MilliSeconds = (
+      (degree + AngularOffsetDegrees)/AngularSpeedDegreesPerSec
+    ) * SecondsToMilliseconds;
+  delay(t_MilliSeconds);
   stopCar();
 }
 
 void RobotCar::leftTurn()
 {
-  float analogWheelValue = calculateAnalogWheelValue();
   //stop car and delay it to ensure turn occurs smoothly 
   stopCar();
-  delay(100);
+  delay(ACTION_DELAY_MS);
+
   //analog value should be smaller for smoother turn
-  analogWrite(ENA,130);
-  analogWrite(ENB,130);
-  digitalWrite(IN1,LOW);
-  digitalWrite(IN2,HIGH);
-  digitalWrite(IN3,LOW);
-  digitalWrite(IN4,HIGH);
-  //Calibrate from degrees to time in ms (Theta = omega * t) using Linear Regression
-  float t = ((degree + 36)/119.143) * 1000;
-  delay(t);
+  analogWrite(ENA, TURN_PWM_SPEED);
+  analogWrite(ENB, TURN_PWM_SPEED);
+  digitalWrite(IN1, LOW);
+  digitalWrite(IN2, HIGH);
+  digitalWrite(IN3, LOW);
+  digitalWrite(IN4, HIGH);
+  float t_MilliSeconds = (
+      (degree + AngularOffsetDegrees)/AngularSpeedDegreesPerSec
+    ) * SecondsToMilliseconds;
+  delay(t_MilliSeconds);
   stopCar();
 } 
 
 void RobotCar::forward()
 {
-  float obstacleDistance = 0, targetTime;
-  int currentDistance = 0, currentTime, stoppedTime = 0, startTime, initialTimeStop, finalTimeStop;
+  float obstacleDistance = 0;
+  int currentDistance = 0, stoppedTime = 0;
   bool carBlocked = false;
 
-  startTime = millis();
-  digitalWrite(IN1,HIGH);
-  digitalWrite(IN2,LOW);
-  digitalWrite(IN3,LOW);
-  digitalWrite(IN4,HIGH);
+  int startTime = millis();
+  digitalWrite(IN1, HIGH);
+  digitalWrite(IN2, LOW);
+  digitalWrite(IN3, LOW);
+  digitalWrite(IN4, HIGH);
 
-  targetTime = distance/velocity * 1000;
-  //Measure current time
-  currentTime = millis() - startTime - stoppedTime;
+  float targetTime = distance/velocity * SecondsToMilliseconds;
+  int currentTime = millis() - startTime - stoppedTime;
 
   //loop to for obstacle detection
   while (currentTime <= targetTime){
     currentTime = millis() - startTime - stoppedTime;
     obstacleDistance = measureDistance();
+
     // loop to check if obstacle is in sight 
     int initialTimeStop = millis();
-    while(obstacleDistance <= 12) {
+    while(obstacleDistance <= MAX_DISTANCE_INCHES) {
       stopCar();
-      //must remeasure or else will be in the loop constantly
+      // must remeasure or else will be in the loop constantly
       obstacleDistance = measureDistance();
       carBlocked = true;
     }
+
     int finalTimeStop =  millis();
     if (carBlocked == true) {
       stoppedTime += (finalTimeStop - initialTimeStop);
-      //reset carBlocked so that it doesn't repeat loop
+      // reset carBlocked so that it doesn't repeat loop
       carBlocked = false;
-      //turn motors on again 
-      digitalWrite(IN1,HIGH);
-      digitalWrite(IN2,LOW);
-      digitalWrite(IN3,LOW);
-      digitalWrite(IN4,HIGH);
+      // turn motors on again 
+      digitalWrite(IN1, HIGH);
+      digitalWrite(IN2, LOW);
+      digitalWrite(IN3, LOW);
+      digitalWrite(IN4, HIGH);
     }
   }                                                                                                                                                                                   
   stopCar();     
 }
 
-void RobotCar::inputSpeed()
+void RobotCar::inputSpeed() const
 {
   float analogWheelValue = calculateAnalogWheelValue();
   analogWrite(ENA, analogWheelValue);
   analogWrite(ENB, analogWheelValue);	
 }
 
-void RobotCar::bluetoothCarCommand(char cmd)
+void RobotCar::bluetoothCarCommand(char cmd) const
 {
- switch(cmd){
+  switch(cmd){
     case 'f': {
       forward();
       break;
