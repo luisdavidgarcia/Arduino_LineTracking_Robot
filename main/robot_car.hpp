@@ -28,10 +28,9 @@ constexpr unsigned int TURN_PWM_SPEED = 130;
 
 class RobotCar {
 private:
-  float distance = 1;
-  float velocity = 1.2;
-  float degree = 90;
-  float objectDistance = 0;
+  float distance_ = 1;
+  float velocity_ = 1.2;
+  float degree_ = 90;
 
   void setUp() const;
   float calculateAnalogWheelValue() const;
